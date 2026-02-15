@@ -1,0 +1,75 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حرب النيون: نسخة Pi Network</title>
+    <!-- استدعاء مكتبة Pi SDK الرسمية -->
+    <script src="https://sdk.minepi.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com');
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; touch-action: none; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; color: #00f2ff; font-weight: 900; font-size: 16px; pointer-events: none; text-shadow: 0 0 10px #00f2ff; }
+        #best { position: absolute; top: 45px; width: 100%; text-align: center; color: #fbbf24; font-size: 12px; letter-spacing: 1px; }
+        #user-tag { position: absolute; bottom: 10px; right: 10px; color: #00f2ff; font-size: 10px; opacity: 0.7; }
+        #msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(2, 6, 23, 0.98); padding: 30px; border-radius: 25px; text-align: center; color: white; display: none; border: 2px solid #00f2ff; width: 75%; box-shadow: 0 0 50px rgba(0, 242, 255, 0.3); backdrop-filter: blur(10px); z-index: 1000; }
+        .btn { background: #18b5bc; color: #000; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 12px; margin-top: 15px; width: 100%; font-family: 'Orbitron'; cursor: pointer; }
+        #power-up { position: absolute; bottom: 100px; width: 100%; text-align: center; color: #fbbf24; font-weight: bold; display: none; animation: flash 0.5s infinite; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div>SCORE: <span id="score">0</span></div>
+        <div>WAVE: <span id="wave">1</span></div>
+    </div>
+    <div id="best">BEST_SYNC: <span id="highScore">0</span></div>
+    <div id="user-tag">PLAYER: <span id="username">CONNECTING...</span></div>
+    
+    <div id="power-up">TRIPLE_LASER_ACTIVE</div>
+
+    <div id="msg">
+        <h1 id="overTitle" style="color: #ff007f; margin: 0;">CONNECTION_LOST</h1>
+        <p id="fScore" style="margin: 20px 0; color: #94a3b8;"></p>
+        <p id="newBest" style="color: #fbbf24; display: none; font-weight: bold;">NEW_RECORD_SYNCED!</p>
+        <button class="btn" onclick="location.reload()">REBOOT_SYSTEM</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- إعدادات PI NETWORK ---
+        const Pi = window.Pi;
+        Pi.init({ version: "2.0" });
+
+        async function loginPi() {
+            try {
+                const auth = await Pi.authenticate(['username', 'payments'], onIncompletePayment);
+                document.getElementById('username').innerText = auth.user.username;
+            } catch (err) {
+                document.getElementById('username').innerText = "GUEST_MODE";
+                console.error(err);
+            }
+        }
+
+        function onIncompletePayment(payment) {
+            // للتعامل مع المدفوعات التي لم تكتمل
+        }
+
+        // --- كود اللعبة المعدل ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let player, bullets, enemies, parts, items, score, active, frame, touchX, touchY, wave, powerTimer, flash;
+        let highScore = localStorage.getItem('neon_high_score') || 0;
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            document.getElementById('highScore').innerText = highScore;
+            
+            player = { x: canvas.width/2, y: canvas.height-150, s: 22 };
+            bullets = []; enemies = []; parts = []; items = [];
+            score = 0; frame = 0; active = true; wave = 1; powerTim
