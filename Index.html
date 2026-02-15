@@ -19,6 +19,20 @@
         @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
+    <script>
+  // تفعيل الاتصال بـ Pi Network
+  Pi.init({ version: "2.0", sandbox: true });
+
+  // التعرف على اسم المستخدم
+  Pi.authenticate(['username'], function(payment) {
+      // معالجة المدفوعات لاحقاً
+  }).then(function(auth) {
+      console.log("تم تسجيل الدخول: " + auth.user.username);
+  }).catch(function(error) {
+      console.error(error);
+  });
+</script>
+
 <body>
 
     <div id="ui">
